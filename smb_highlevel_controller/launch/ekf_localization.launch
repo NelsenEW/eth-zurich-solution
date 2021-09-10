@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<launch>
+  <param name="use_sim_time" value="true"/>
+  <arg name="simulation" 			    default="true"/>
+  <arg name="robot_namespace" 		default=""/>
+  <arg name="enable_ekf" 			    default="true"/>
+  <arg name="robot_description"  	default="robot_description"/>
+  <arg name="description_file"    default="$(find smb_description)/urdf/smb_standalone.urdf.xacro"/>
+
+  <!--Half Speed -->
+  <arg name="half_speed"          default="false"/>
+
+  <!-- Load robot description -->
+    <!-- Load robot description for gazebo -->
+  <include file="$(find smb_description)/launch/load.launch">
+    <arg name="simulation"       value="$(arg simulation)"/>
+    <arg name="description_name" value="$(arg robot_description)"/>
+    <arg name="description_file" value="$(arg description_file)"/>
+    <arg name="wheel_joint_type" value="continuous"/>
+    <arg name="robot_namespace"  value="$(arg robot_namespace)"/>
+  </include>
+
+  <!-- Launching EKF for robot localization -->
+  <group if="$(arg enable_ekf)" >
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization">
+      <rosparam command="load" file="$(find smb_control)/config/localization.yaml" />
+    </node>
+  </group>
+
+  <!-- Launching smb_robot_state_publisher -->
+  <node name="smb_robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+    <param name="publish_frequency" value="100"/>
+    <param name="use_tf_static"     value="true"/>
+    <remap from="robot_description" to="$(arg robot_description)"/>
+  </node>
+
+  <!-- Launching static tf publisher -->
+  <node pkg="tf" type="static_transform_publisher" name="smb_top_view" args="0 0 2 0 0 0 1 base_link smb_top_view 100"/>
+  
+  <!-- Launching rosbag -->
+  <node if="$(arg half_speed)" pkg="rosbag" type="play" name="rosbag_player" output="screen" args="--rate=0.5 --clock $(find smb_highlevel_controller)/bag/smb_navigation.bag"/>
+  <node unless="$(arg half_speed)" pkg="rosbag" type="play" name="rosbag_player" output="screen" args="--clock $(find smb_highlevel_controller)/bag/smb_navigation.bag"/>
+  
+  <!-- Launching RViz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find smb_highlevel_controller)/rviz/ekf_localization.rviz"/>
+
+  <!-- Launching rqt multiplot -->
+  <node name="rqt_multiplot" pkg="rqt_multiplot" type="rqt_multiplot" args="--multiplot-config $(find smb_highlevel_controller)/config/xy_multiplot.xml --multiplot-run-all"/>
+</launch>

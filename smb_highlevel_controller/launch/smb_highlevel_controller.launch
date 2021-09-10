@@ -19,4 +19,7 @@
   <!-- Launching RViz -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find smb_highlevel_controller)/rviz/smb_highlevel_controller.rviz"/>
 
+  <!-- Launching rqt multiplot -->
+  <node name="rqt_multiplot" pkg="rqt_multiplot" type="rqt_multiplot" args="--multiplot-config $(find smb_highlevel_controller)/config/xy_multiplot.xml --multiplot-run-all"/>
+
 </launch>
