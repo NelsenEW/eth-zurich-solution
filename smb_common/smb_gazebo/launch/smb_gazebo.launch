@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+
+  <!-- GAZEBO ARGUMENTS -->
+  <!-- Run Gazebo headless -->
+  <arg name="headless"                              default="false"/>
+  <!-- Model path -->
+  <arg name="model_path"                            default="$(find smb_gazebo)/"/>
+  <arg name="robot_namespace"                       default=""/>
+  <arg name="robot_model_name"                      default="smb"/>
+  <arg name="enable_ekf"                            default="true"/>
+
+  <!-- Name of the world -->
+  <arg name="world"                                 default="empty"/>
+  <!-- Path to the world file -->
+  <arg name="world_file"                            default="$(find smb_gazebo)/worlds/$(arg world).world"/>
+  <arg name="laser_enabled"							            default="true"/>
+
+  <!-- Set the initial pose of the robot's main body -->
+  <arg name="x"                                     default="0.0"/>
+  <arg name="y"                                     default="0.0"/>
+  <arg name="z"                                     default="0.4"/>
+  <arg name="roll"                                  default="0.0"/>
+  <arg name="pitch"                                 default="0.0"/>
+  <arg name="yaw"                                   default="0.0"/>
+  <!-- Start paused -->
+  <arg name="paused"                                default="false"/>
+  <!-- Use simulation clock -->
+  <arg name="use_sim_time"                          default="true"/>
+  <!-- Debug mode -->
+  <arg name="debug"                                 default="false"/>
+  <!-- Verbose mode -->
+  <arg name="verbose"                               default="true"/>
+
+  <arg name="laser_scan_min_height"                  default="0.0"/>
+  <arg name="laser_scan_max_height"                  default="0.1"/>
+
+  <!-- GUI ARGUMENTS -->
+  <!-- Enable/disable Gazebo GUI -->
+  <arg name="run_gui"                               default="true"/>
+  
+  <!-- ROBOT ARGUMENTS -->
+  <!-- Name of the robot description parameter -->
+  <arg name="robot_description" default="robot_description"/>
+
+  <!-- Load Gazebo world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <env name="GAZEBO_MODEL_PATH" value="$(arg model_path)"/>
+    <arg name="world_name"        value="$(arg world_file)"/>
+    <arg name="paused"            value="$(arg paused)"/>
+    <arg name="use_sim_time"      value="$(arg use_sim_time)"/>
+    <arg name="gui"               value="$(arg run_gui)"/>
+    <arg name="headless"          value="$(arg headless)"/>
+    <arg name="debug"             value="$(arg debug)"/>
+    <arg name="verbose"           value="$(arg verbose)"/>
+  </include>
+
+  <!-- Spawn robot in Gazebo -->
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
+    args="-param $(arg robot_description) -urdf -model $(arg robot_model_name) -x $(arg x)
+      -y $(arg y) -z $(arg z) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"
+    output="screen"/>
+    
+    
+    
+  <!-- Convert 3D velodyne scan to laser scan -->
+  <node name= "pointcloud_to_laserscan" pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" if="$(arg laser_enabled)">
+        <remap from="cloud_in" to="/rslidar_points"/>
+        <remap from="scan" to="/scan"/>
+        <rosparam>
+            target_frame: rslidar # Leave disabled to output scan in pointcloud frame
+            transform_tolerance: 0.01
+            min_height: $(arg laser_scan_min_height)
+            max_height: $(arg laser_scan_max_height)
+
+            angle_min: -1.5708 # -M_PI/2
+            angle_max: 1.5708 # M_PI/2
+            angle_increment: 0.0087 # M_PI/360.0
+            scan_time: 0.03333
+            range_min: 0.45
+            range_max: 50.0
+            use_inf: true
+            inf_epsilon: 1.0
+
+            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+  </node>
+
+
+  <include file="$(find smb_control)/launch/control.launch">
+    <arg name="simulation"      default="true"/>
+    <arg name="robot_namespace"     default="$(arg robot_namespace)"/>
+    <arg name="robot_description"   default="$(arg robot_description)"/>
+    <arg name="enable_ekf"          default="$(arg enable_ekf)" />
+  </include>
+</launch>

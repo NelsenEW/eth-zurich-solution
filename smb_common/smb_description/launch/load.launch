@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+  <!-- Configurations (can also be set as argument) -->
+  <arg name="description_file"   default="$(find smb_description)/urdf/smb_standalone.urdf.xacro"/>
+  <arg name="description_name"   default="robot_description"/>
+  <arg name="wheel_joint_type"   default="fixed"/>
+  <arg name="simulation"         default="true"/>
+  <arg name="robot_namespace"    default=""/>
+  <arg name="lidar"              default="true"/>
+  <arg name="publish_tf"         default="false"/>
+
+  <!-- Run xacro script to generate Super mega bot description -->
+  <param name="$(arg description_name)" command="$(find xacro)/xacro
+    $(arg description_file)
+    wheel_joint_type:=$(arg wheel_joint_type)
+    simulation:=$(arg simulation)
+    robot_namespace:=$(arg robot_namespace)
+    lidar:=$(arg lidar)
+    description_name_xacro:=$(arg description_name)
+    publish_tf:=$(arg publish_tf)"/>
+</launch>

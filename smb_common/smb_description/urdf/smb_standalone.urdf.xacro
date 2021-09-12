@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="smb">
+
+  <!-- Arguments -->
+  <xacro:arg name="wheel_joint_type"          default="fixed"/> <!-- continuous for gazebo -->
+  <xacro:arg name="simulation"                default="false"/>
+  <xacro:arg name="lidar"                     default="true"/>
+  <xacro:arg name="robot_namespace"           default=""/>
+  <xacro:arg name="description_name_xacro"    default="robot_description"/>
+  <xacro:arg name="publish_tf"                default="false"/>
+
+  <xacro:property name="lidar" value="$(arg lidar)"/>
+      <!-- Includes -->
+  <xacro:include filename="$(find smb_description)/urdf/smb_big_properties.urdf.xacro" />
+  <xacro:include filename="$(find smb_description)/urdf/smb.urdf.xacro"/>
+
+  <xacro:smb wheel_joint_type="$(arg wheel_joint_type)" simulation="$(arg simulation)"/>
+  
+
+  <!-- Handle gazebo plugins -->
+  <xacro:include filename="$(find smb_description)/urdf/smb_ros_skid_steer.gazebo.xacro"/>
+
+ 
+  <xacro:smb_ros_skid_steer_plugin description_name="$(arg description_name_xacro)"
+      broadcast_tf="$(arg publish_tf)" robot_namespace="$(arg robot_namespace)"/>
+ 
+
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>$(arg robot_namespace)</robotNamespace>
+      <robotParam>$(arg description_name_xacro)</robotParam>
+    </plugin>
+  </gazebo>
+
+</robot>

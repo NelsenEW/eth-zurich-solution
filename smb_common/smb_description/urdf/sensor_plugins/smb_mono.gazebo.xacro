@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+
+<!-- This file contains plugins to simulate an Imu sensor attached to the robot. -->
+<!-- Documentation can be found at http://wiki.ros.org/hector_gazebo_plugins -->
+
+<robot name="smb" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="mono_cam" params="base_link simulation">
+    <!--                              Imu  Properties 				          	-->
+    <xacro:property name="mono_base_link"		value="${base_link}"/>
+    <xacro:property name="mono_origin_rpy"		value="0 0 0"/>
+    <xacro:property name="mono_origin_xyz"		value="0.35 -0.15 0.29"/>
+
+    <xacro:property name="mono_update_rate"		value="30"/>
+    <xacro:property name="mono_link"  			value="mono_link"/>
+    <xacro:property name="mono_topic" 			value="/mono/cam0/image_raw"/>
+
+
+    <link name="${mono_link}">
+      <inertial>
+        <mass value="0.01" /> <!-- [kg] -->
+        <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+      </inertial>
+      <visual>
+        <geometry>
+          <box size="0.02 0.05 0.03"/> 
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="0.02 0.05 0.03"/>
+        </geometry>
+      </collision>
+      <material name="red">
+          <color rgba="255 0 10 255"/>
+        </material>
+    </link>
+
+      <gazebo reference="${mono_link}">
+        <material>Gazebo/Red</material>
+      </gazebo>
+
+    <joint name="mono_camera_joint" type="fixed">
+      <origin xyz="${mono_origin_xyz}" rpy="${mono_origin_rpy}"/>
+      <parent link="${mono_base_link}"/>
+      <child link="${mono_link}"/>
+    </joint>
+
+      <gazebo reference="mono_camera_joint">
+        <disableFixedJointLumping>true</disableFixedJointLumping>
+      </gazebo>
+
+      <xacro:if value="${simulation}">
+      <gazebo reference="${mono_link}">
+      <sensor type="camera" name="mono_cam">
+        <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>${mono_update_rate}</update_rate>
+      <camera>
+          <horizontal_fov>1.3962634</horizontal_fov> <!-- 80 deg--> >
+          <image>
+            <width>640</width>
+            <height>480</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.01</near>
+            <far>100</far>
+          </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise parameters based on published spec for Hokuyo laser
+                achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+                stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+                reading. -->
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+        <plugin name="gazebo_ros_camera_controller" filename="libgazebo_ros_camera.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>0.0</updateRate>
+          <cameraName>mono_cam</cameraName>
+          <imageTopicName>${mono_topic}</imageTopicName>
+          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+          <frameName>${mono_link}</frameName>
+          <hackBaseline>0.07</hackBaseline>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+      </sensor>
+    </gazebo>
+    </xacro:if>
+
+
+  </xacro:macro> 
+</robot>

@@ -1,0 +1,52 @@
+<launch>
+
+  <!-- Name of the robot setup -->
+  <arg name="model_setup" default="smb_standalone"/>
+  <!-- Give the robot description parameter a name -->
+  <arg name="description_name" default="smb_description"/>
+  <!-- Set path of robot description -->
+  <arg name="description_file" default="$(find smb_description)/urdf/$(arg model_setup).urdf.xacro"/>
+  <!-- TF prefix -->
+  <arg name="tf_prefix" default=""/>
+  <!-- Joint state topic name -->
+  <arg name="joint_states_topic" default="/sensors/joint_states"/>
+  <!-- Namespace to run the nodes in -->
+  <arg name="ns" default="smb_tf_publisher"/>
+  <!-- Simulation -->
+  <arg name="simulation" default="true"/>
+  <arg name="lidar" default="true"/>
+  <arg name="wheel_joint_type"   default="continuous"/>
+
+  
+  <!-- Load robot description -->
+  <include file="$(find smb_description)/launch/load.launch">
+    <arg name="description_name" value="$(arg description_name)"/>
+    <arg name="description_file" value="$(arg description_file)"/>
+    <arg name="simulation" value="$(arg simulation)"/>
+    <arg name="lidar" value="$(arg lidar)"/>
+    <arg name="wheel_joint_type" value="$(arg wheel_joint_type)"/>
+  </include>
+
+  <!-- Open joint_state_publisher for smb_description with GUI for debugging -->
+  <node name="smb_joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" output="screen">
+    <param name="use_gui"           value="true"/>
+    <param name="rate"              value="100"/>
+    <remap from="robot_description" to="$(arg description_name)"/>
+    <remap from="joint_states"      to="$(arg joint_states_topic)"/>
+  </node>
+
+  <!-- Publish robot state (joints) as TF -->
+  <node ns="$(arg ns)" name="smb_robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen">
+    <param name="publish_frequency" value="100"/>
+    <param name="use_tf_static"     value="true"/>
+    <param name="tf_prefix"         value="$(arg tf_prefix)"/>
+    <remap from="robot_description" to="$(arg description_name)"/>
+    <remap from="joint_states"      to="$(arg joint_states_topic)"/>
+  </node>
+
+  <!-- Open Rviz -->
+  <node name="rviz" pkg="rviz" type="rviz"
+  args="-d $(find smb_description)/rviz/smb_description.rviz"
+  output="screen"/>
+
+</launch>

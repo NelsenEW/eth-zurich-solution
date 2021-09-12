@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<robot name="smb" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:arg name="simulation"   		default="false"/>
+  <xacro:arg name="gpu" 		 		default="false"/>
+  <xacro:arg name="pointcloud_topic"	default="/rslidar_points"/>
+
+  <xacro:property name="gpu" 		value="$(arg gpu)" />
+
+  <xacro:macro name="LIDAR" params="base_link simulation">
+
+    <xacro:if value="${simulation}">
+      <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro"/>
+
+      <xacro:VLP-16 parent="${base_link}" name="rslidar" topic="$(arg pointcloud_topic)" hz="10" samples="440" gpu="${gpu}">
+        <origin xyz="0.00445 0 ${0.298+chassisHeight/2.0}" rpy="0 0 0" />
+      </xacro:VLP-16>
+
+      <gazebo reference="rslidar_base_mount_joint">
+        <preserveFixedJoint>true</preserveFixedJoint>
+      </gazebo>
+
+      <gazebo reference="rslidar_base_scan_joint">
+        <preserveFixedJoint>true</preserveFixedJoint>
+      </gazebo>
+
+    </xacro:if>
+
+    <xacro:unless value="${simulation}">
+      <link name="rslidar">
+          <inertial>
+            <mass value="0.01"/>
+            <origin xyz="0 0 0"/>
+            <inertia ixx="1e-7" ixy="0" ixz="0" iyy="1e-7" iyz="0" izz="1e-7"/>
+          </inertial>
+          <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+              <cylinder radius="0.05" length="0.08"/>
+            </geometry>
+            <material name="Cyan">
+              <color rgba="0 1.0 1.0 1.0"/>
+            </material>
+          </visual>
+      </link>
+
+      <joint name="base_to_rslidar" type="fixed">
+        <parent link="${base_link}"/>
+        <child link="rslidar"/>
+        <origin xyz="0 0 0.31" rpy="0 0 4.71238"/>
+      </joint>
+    </xacro:unless>
+
+  </xacro:macro>
+
+</robot>

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="smb">
+
+<xacro:macro name="odometry_plugin" params="sensor_link topic_name odom_frame:=camera_odom_frame child_odom_frame:=camera_pose_frame publish_tf:=true rate:=20 max_linear_speed_before_settle:=0.001 max_angular_speed_before_settle:=0.001">
+    <gazebo>
+        <plugin name="smb_odometry_plugin" filename="libodometry_source_plugin.so">
+            <robotNamespace>smb</robotNamespace>
+            <bodyName>${sensor_link}</bodyName>
+            <topicName>${topic_name}</topicName>
+            <odomFrame>${odom_frame}</odomFrame>
+            <childOdomFrame>${child_odom_frame}</childOdomFrame>
+            <publishTf>${publish_tf}</publishTf>
+            <xyzOffset>0 0 0</xyzOffset>
+            <rpyOffset>0 0 0</rpyOffset>
+            <gaussianNoise>0</gaussianNoise>
+            <updateRate>${rate}</updateRate>
+            <maxLinearSpeedBeforeSettle>${max_linear_speed_before_settle}</maxLinearSpeedBeforeSettle>
+            <maxAngularSpeedBeforeSettle>${max_angular_speed_before_settle}</maxAngularSpeedBeforeSettle>
+        </plugin>
+    </gazebo>
+</xacro:macro>
+</robot>

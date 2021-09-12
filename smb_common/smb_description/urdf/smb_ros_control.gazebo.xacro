@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<!-- This file contains the Gazebo controller interface. -->
+<robot name="smb" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="smb_ros_control_plugin" params="description_name
+                                                        broadcast_tf
+                                                        robot_namespace">
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>$(arg robot_namespace)</robotNamespace>
+      <robotDescription>${description_name}</robotDescription>
+      <legacyModeNS>true</legacyModeNS>
+    </plugin>
+  </gazebo>
+
+  </xacro:macro>
+
+</robot>

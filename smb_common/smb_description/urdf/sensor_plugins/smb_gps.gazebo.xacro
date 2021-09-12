@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+
+<!-- This file contains a plugin to simulate a gps sensor attached to the robot. -->
+<!-- Documentation can be found at http://wiki.ros.org/hector_gazebo_plugins -->
+
+<robot name="smb" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<xacro:macro name="GPS" params="base_link simulation:=false">
+
+   <!--                              Gps  Properties 	           				-->
+    <xacro:property name="gps_base_link"		value="base"/>
+    <xacro:property name="gps_origin_rpy"		value="0 0 0"/>
+    <xacro:property name="gps_origin_xyz"		value="0 0 0.545"/>
+
+    <xacro:property name="gps_update_rate" 		value="4"/>
+    <xacro:property name="gps_link" 			value="gps_link"/>
+    <xacro:property name="gps_topic" 			value="gps"/>
+    <xacro:property name="gps_velocity_topic"           value="fix_velocity"/>
+    <xacro:property name="reference_latitude" 		value="49.860246"/>
+    <xacro:property name="reference_longitude"          value="8.687077"/>
+    <xacro:property name="reference_altitude"		value="0.0"/>
+    <xacro:property name="reference_heading" 		value="0.0"/>
+    <xacro:property name="status" 			value="0"/>
+    <xacro:property name="offset" 			value="0.0 0.0 0.0"/>
+    <!-- standard deviation of the position drift error: Even if this parameter is zero, the velocity error is also reflected in the position.-->
+    <xacro:property name="drift" 			value="5.0 5.0 5.0"/>
+    <xacro:property name="drift_frequency" 		value="0 0 0"/> 
+    <xacro:property name="gaussian_noise" 		value="0.001 0.001 0.001"/> 
+    <xacro:property name="velocity_offset" 		value="0 0 0"/> 
+    <xacro:property name="velocity_drift" 		value="0 0 0"/> 
+    <xacro:property name="velocity_drift_frequency" 	value="0 0 0"/> 
+    <xacro:property name="velocity_gaussian_noise" 	value="0.05 0.05 0.05"/> 
+
+    <xacro:if value="${simulation}">
+    <gazebo>   
+      <plugin name="smb_gps_plugin" filename="libhector_gazebo_ros_gps.so">
+        <updateRate>${gps_update_rate}</updateRate>
+        <bodyName>${gps_link}</bodyName>
+        <frameId>${gps_link}</frameId>
+        <topicName>${gps_topic}</topicName>
+        <velocityTopicName>${gps_velocity_topic}</velocityTopicName>
+        <referenceLatitude>${reference_latitude}</referenceLatitude>
+        <referenceLongitude>${reference_longitude}</referenceLongitude>
+        <referenceAltitude>${reference_altitude}</referenceAltitude>
+        <referenceHeading>${reference_heading}</referenceHeading>
+        <status>${status}</status>
+        <offset>${offset}</offset>
+        <drift>${drift}</drift>
+        <driftFrequency>${drift_frequency}</driftFrequency>
+  	  <gaussianNoise>${gaussian_noise}</gaussianNoise>
+  	  <velocityOffset>${velocity_offset}</velocityOffset>                
+  	  <velocityDrift>${velocity_drift}</velocityDrift>
+  	  <velocityDriftFrequency>${velocity_drift_frequency}</velocityDriftFrequency>                
+  	  <velocityGaussianNoise>${velocity_gaussian_noise}</velocityGaussianNoise>
+      </plugin>
+    </gazebo>
+    </xacro:if>
+
+    <!-- Gps is fixed to the base link -->
+    <joint name="gps_joint" type="fixed">
+      <origin xyz="${gps_origin_xyz}" rpy="${gps_origin_rpy}"/>
+      <parent link="${gps_base_link}"/>
+      <child link="${gps_link}"/>
+    </joint>
+
+    <!-- Gps link -->
+    <link name="${gps_link}">
+      <inertial>
+        <mass value="0.001"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.0001"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+        <box size="0.06 0.06 0.005"/>
+      </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <box size=".001 .001 .001"/>
+        </geometry>
+      </collision>
+      <material name="grey_dark2">
+          <color rgba="0.8 0.8 0.8 1.0"/>
+      </material>
+    </link>
+
+    <gazebo reference="${gps_link}">
+        <material>Gazebo/DarkGrey</material>
+    </gazebo>
+
+    <gazebo reference="gps_joint">
+        <disableFixedJointLumping>true</disableFixedJointLumping>
+    </gazebo>
+
+</xacro:macro>
+</robot>

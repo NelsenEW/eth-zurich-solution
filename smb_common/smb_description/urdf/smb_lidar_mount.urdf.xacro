@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+
+<!-- This file contains plugins to simulate an Imu sensor attached to the robot. -->
+<!-- Documentation can be found at http://wiki.ros.org/hector_gazebo_plugins -->
+
+<robot name="smb" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="lidar_mount" params="base_link">
+    <!--                              Imu  Properties 				          	-->
+    <xacro:property name="mount_base_link"		value="${base_link}"/>
+    <xacro:property name="mount_origin_rpy"		value="0 0 0"/>
+    <xacro:property name="mount_origin_xyz"		value="0.00445 0 ${0.228+chassisHeight/2.0}"/>
+
+    <link name="lidar_mount_link">
+      <visual>
+        <geometry>
+          <mesh filename="package://smb_description/urdf/new_payload/meshes/SMB_lidar_mount.dae"/>
+        </geometry>
+      </visual>
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="1e-4"/>
+        <xacro:cylinder_inertia m="1e-4" r="1e-4" h="1e-4"/>
+      </inertial>      
+    </link>
+
+    <gazebo reference="lidar_mount_link">
+      <material>Gazebo/Grey</material>
+    </gazebo>
+
+    <joint name="lidar_mount_joint" type="fixed">
+      <origin xyz="${mount_origin_xyz}" rpy="${mount_origin_rpy}"/>
+      <parent link="${mount_base_link}"/>
+      <child link="lidar_mount_link"/>
+    </joint>
+
+    <gazebo reference="lidar_mount_joint">
+      <disableFixedJointLumping>true</disableFixedJointLumping>
+    </gazebo>
+
+
+  </xacro:macro> 
+</robot>

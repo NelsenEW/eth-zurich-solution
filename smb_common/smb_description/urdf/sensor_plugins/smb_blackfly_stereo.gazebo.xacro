@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+
+<robot name="smb" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:macro name="blackfly_camera_stereo_plugin" params="name rate">
+
+
+<gazebo reference="${name}_left_link">
+      <sensor type="multicamera" name="${name}_stereo_cam">
+      <visualize>false</visualize>
+      <update_rate>${rate}</update_rate>
+      <camera name="left">
+          <pose>0.0066 0 0 0 0 0</pose>
+          <horizontal_fov>1.3962634</horizontal_fov> <!-- 80 deg--> >
+          <image>
+            <width>720</width>
+            <height>540</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.01</near>
+            <far>300</far>
+          </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise parameters based on published spec for Hokuyo laser
+                achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+                stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+                reading. -->
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+
+      <camera name="right">
+          <pose>0.0066 -0.09 0 0 0 0</pose>
+          <horizontal_fov>1.3962634</horizontal_fov> <!-- 80 deg--> >
+          <image>
+            <width>720</width>
+            <height>540</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.01</near>
+            <far>300</far>
+          </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise parameters based on published spec for Hokuyo laser
+                achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+                stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+                reading. -->
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+
+        <plugin name="stereo_camera_controller" filename="libgazebo_ros_multicamera.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>0.0</updateRate>
+          <cameraName>${name}_stereo_cam</cameraName>
+          <imageTopicName>image_raw</imageTopicName>
+          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+          <frameName>${name}_left_optical_link</frameName>
+          <hackBaseline>0.09</hackBaseline>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+      </sensor>
+    </gazebo>
+</xacro:macro>
+</robot>

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="smb">
+
+    <xacro:property name="base_link_name" value="base_link"/>
+    <xacro:property name="chassisHeight" value="0.197"/>
+    <xacro:property name="chassisLength" value="0.605"/>
+    <xacro:property name="chassisWidth" value="0.410"/>
+    <xacro:property name="chassisMass" value="40"/>
+
+    <xacro:property name="topXOffset" value="-0.070"/>
+    <xacro:property name="topHeight" value="0.4"/>
+    <xacro:property name="topLength" value="0.66"/>
+    <xacro:property name="topWidth" value="0.410"/>
+    <xacro:property name="topMass" value="0.001"/>
+
+    <xacro:property name="wheelWidth" value="0.1"/>
+    <xacro:property name="wheelRadius" value="0.19"/>
+    <xacro:property name="frontWheelX" value="0.2159"/>
+    <xacro:property name="backWheelX" value="-0.2159"/>
+    <xacro:property name="wheelClearance" value="0.03"/>
+    <xacro:property name="wheelHeight" value="0.08"/>
+    <xacro:property name="wheelMass" value="5"/>
+</robot>

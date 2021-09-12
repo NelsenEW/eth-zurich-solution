@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+
+<!-- This file contains the Gazebo controller interface. -->
+<robot name="smb" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="smb_ros_skid_steer_plugin" params="description_name
+                                                        broadcast_tf
+                                                        robot_namespace">
+
+  <xacro:arg name="base_cmd_topic_name" default="cmd_vel"/>
+
+    <gazebo>
+      <plugin name="gazebo_ros_control" filename="libgazebo_ros_skid_steer_drive.so">
+        <robotNamespace>${robot_namespace}</robotNamespace>
+        <robotDescription>${description_name}</robotDescription>
+        <broadcastTF>${broadcast_tf}</broadcastTF>
+        <leftFrontJoint>LF_WHEEL_JOINT</leftFrontJoint>
+        <rightFrontJoint>RF_WHEEL_JOINT</rightFrontJoint>
+        <leftRearJoint>LH_WHEEL_JOINT</leftRearJoint>
+        <rightRearJoint>RH_WHEEL_JOINT</rightRearJoint>
+        <wheelSeparation>${chassisWidth+wheelClearance*2+wheelWidth}</wheelSeparation>
+        <wheelDiameter>${2*wheelRadius}</wheelDiameter>
+        <torque>5.0</torque>
+        <commandTopic>$(arg base_cmd_topic_name)</commandTopic>
+        <odometryTopic>odom</odometryTopic>
+        <odometryFrame>odom</odometryFrame>
+        <robotBaseFrame>${base_link_name}</robotBaseFrame>
+        <updateRate>100</updateRate>
+        <covariance_x>0.1</covariance_x>
+        <covariance_y>0.01</covariance_y>
+        <covariance_yaw>0.1</covariance_yaw>
+      </plugin>
+    </gazebo>
+
+  </xacro:macro>
+
+</robot>
