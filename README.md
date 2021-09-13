@@ -38,3 +38,27 @@ git clone https://github.com/NelsenEW/eth-zurich-solution
 cd ..
 catkin build
 ```
+
+## [Exercise 1](<docs/exercise/Exercise Session 1.pdf>)
+This exercise is based on [lecture 1](<docs/lecture/ROS Course Slides Course 1.pdf>).
+
+Run the launch file with the following command:
+
+`roslaunch smb_highlevel_controller smb_highlevel_controller.launch`
+
+### Output
+
+|![solution_1.png](docs/image/solution_1.png)|
+|:--:|
+| <b>Gazebo with SMB and teleop twist keyboard</b>|
+
+#### Command line
+* To control smb robot in gazebo through command line (press tab for autocompletion):
+
+    `rostopic pub /cmd_vel geometry_msgs/Twist '[0.5,0,0]' '[0,0,0]'`
+#### [smb_highlevel_controller.launch](smb_highlevel_controller/launch/smb_highlevel_controller.launch)
+* The world file argument is hardcoded as follow:
+
+    `<arg name="world_file" value="/usr/share/gazebo-9/worlds/robocup14_spl_field.world"/>`
+* To launch the teleop keyboard in a new terminal, set the `launch-prefix` to `xterm -e`
+

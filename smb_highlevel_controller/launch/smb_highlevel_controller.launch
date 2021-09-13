@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+    <!-- Launching the SMB simulation with Robocup World -->
+    <include file="$(find smb_gazebo)/launch/smb_gazebo.launch">
+        <arg name="world_file" value="worlds/robocup14_spl_field.world"/>
+    </include>
+
+    <!-- Launching the teleoperation keyboard node -->
+    <node name="teleop" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" launch-prefix="xterm -e"/>
+
+</launch>
