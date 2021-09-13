@@ -6,6 +6,7 @@ from geometry_msgs.msg import Twist
 from visualization_msgs.msg import Marker
 import tf2_ros
 from tf2_geometry_msgs import PoseStamped
+from std_srvs.srv import SetBool, SetBoolRequest, SetBoolResponse
 
 
 class SmbHighlevelController:
@@ -16,6 +17,8 @@ class SmbHighlevelController:
         self._subscriber_queue_size = subscriber_queue_size
         self._x_vel = 0.0
         self._kp_ang = 0.0
+        self._service_name = ""
+        self._is_start = False
         if not self._read_parameters():
             rospy.logerr("Could not read parameters")
             rospy.signal_shutdown()
@@ -26,11 +29,12 @@ class SmbHighlevelController:
         self._pcl_subscriber = rospy.Subscriber(
             "/rslidar_points", PointCloud2, self._pcl_callback, queue_size=self._subscriber_queue_size
         )
-        self._cmd_publisher = rospy.Publisher(
-            "/cmd_vel", Twist, queue_size=10
-        )
+        self._cmd_publisher = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
         self._marker_publisher = rospy.Publisher(
             "/visualization_marker", Marker, queue_size=10
+        )
+        self._start_server = rospy.Service(
+            self._service_name, SetBool, self._start_callback
         )
 
     def on_shutdown(self):
@@ -53,6 +57,12 @@ class SmbHighlevelController:
             )
             self._kp_ang = rospy.get_param(
                 "/smb_highlevel_controller/p_gain_ang", self._kp_ang
+            )
+            self._service_name = rospy.get_param(
+                "/smb_highlevel_controller/service_name", self._service_name
+            )
+            self._is_start = rospy.get_param(
+                "/smb_highlevel_controller/start_robot", self._is_start
             )
             return True
         except KeyError:
@@ -87,17 +97,23 @@ class SmbHighlevelController:
         target_pose = PoseStamped()
         try:
             target_pose: PoseStamped = self._tf_buffer.transform(
-                source_pose, "odom", rospy.Duration(0.1))
-        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
+                source_pose, "odom", rospy.Duration(0.1)
+            )
+        except (
+            tf2_ros.LookupException,
+            tf2_ros.ConnectivityException,
+            tf2_ros.ExtrapolationException,
+        ) as e:
             rospy.logwarn(f"{e}")
         return target_pose
 
     def _move_to_goal(self, goal_pose: PoseStamped):
         vel_msg = Twist()
-        vel_msg.linear.x = self._x_vel
-        vel_msg.angular.z = self._kp_ang * atan2(
-            goal_pose.pose.position.y, goal_pose.pose.position.x
-        )
+        if self._is_start:
+            vel_msg.linear.x = self._x_vel
+            vel_msg.angular.z = self._kp_ang * atan2(
+                goal_pose.pose.position.y, goal_pose.pose.position.x
+            )
         rospy.logdebug_throttle(2, f"{vel_msg.linear.x = }")
         rospy.logdebug_throttle(2, f"{vel_msg.angular.z = }")
         self._cmd_publisher.publish(vel_msg)
@@ -123,6 +139,15 @@ class SmbHighlevelController:
     def _pcl_callback(self, msg: PointCloud2):
         size = msg.height * msg.row_step
         rospy.loginfo_throttle(2.0, f"Number of points in 3D cloud: {size}")
+
+    def _start_callback(self, req: SetBoolRequest):
+        resp = SetBoolResponse()
+        resp.success = True
+        if self._is_start != req.data:
+            self._is_start = req.data
+            resp.message = "Set SMB to " + "start" if req.data else "stop"
+            rospy.logwarn(f"SMB {self._service_name} service called: {resp.message}")
+        return resp
 
 
 def main():

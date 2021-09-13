@@ -4,6 +4,7 @@ project(smb_highlevel_controller)
 # Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
   rospy
+  std_srvs
   sensor_msgs
   geometry_msgs
   visualization_msgs
@@ -23,6 +24,7 @@ catkin_package(
 
 catkin_python_setup()
 
+
 #############
 ## Install ##
 #############
@@ -31,6 +33,7 @@ catkin_python_setup()
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
    nodes/${PROJECT_NAME}
+   nodes/stop_condition
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
