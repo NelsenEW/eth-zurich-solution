@@ -116,3 +116,38 @@ As can be seen from the `rqt_graph`, the `pointcloud_to_laserscan` node is subsc
 
 #### [package.xml](smb_highlevel_controller/package.xml)
 * Add `depend` for the dependencies which are `roscpp`, `sensor_msgs` and `smb_gazebo`
+## [Exercise 3](<docs/exercise/Exercise Session 3.pdf>)
+**Note: Change `smb_common` package to `smb_common_v2` package**
+
+This exercise is based on [lecture 3](<docs/lecture/ROS Course Slides Course 3.pdf>).
+
+Run the launch file with the following command:
+
+`roslaunch smb_highlevel_controller smb_highlevel_controller.launch`
+
+### Output
+The solution output should be as follow:
+|![solution_3.png](docs/image/solution_3.png)|
+|:--:|
+| <b>Rviz with marker visualization indicate with the green color ball and tf marker, terminal with printed output such as the angle , and smb is heading towards the pillar in gazebo</b>|
+
+### Files
+#### [CMakeLists.txt](smb_highlevel_controller/CMakeLists.txt) and [package.xml](smb_highlevel_controller/package.xml):
+* Add dependencies such as `geometry_msgs`, `tf2_ros`, and `visualization_msgs` package.
+
+#### [SmbHighlevelController.cpp](smb_highlevel_controller/src/SmbHighlevelController.cpp) and [SmbHighlevelController.hpp](smb_highlevel_controller/include/smb_highlevel_controller/SmbHighlevelController.hpp):
+
+* Include `geometry_msgs`, `tf2_ros`, and `visualization_msgs` package.
+* Add two publisher for topics `visualization_marker` and `cmd_vel` during initialization.
+* Create a `goalPose` of type `geometry_msgs::PoseStamped` which is the pillar from the lidar reading with respect to the `rslidar` frame.
+* Create TF listerner and TF buffer to transform the `goalPose` from the `rslidar` frame to `odom` on `transformOdom`.
+* Utilize a P controller from the error angle to drive the error to zero on `moveToGoal`, the x velocity is set to constant without P controller to ensure that the SMB hits the pillar.
+* Publish a visualization marker on `visMarkerPublish` that can be displayed in Rviz.
+
+#### [smb_highlevel_controller.launch](smb_highlevel_controller/launch/smb_highlevel_controller.launch):
+* Change the world argument value to `"$(find smb_highlevel_controller)/world/singlePillar.world"`
+* Add two arguments under `laser_scan_min_height` and `laser_scan_max_height` to -0.2 and 1.0 respectively.
+* Remove the `teleop_twist_keyboard` node from the launch.
+
+#### [smb_highlevel_controller.rviz](smb_highlevel_controller/rviz/smb_highlevel_controller.rviz):
+* Add `Marker` display to visualize the pillar marker indicated with green color ball.

@@ -8,8 +8,13 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
+  geometry_msgs
+  visualization_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+  tf2_msgs
 )
-
 ###################################
 ## catkin specific configuration ##
 ###################################
