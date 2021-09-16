@@ -62,3 +62,57 @@ Run the launch file with the following command:
     `<arg name="world_file" value="/usr/share/gazebo-9/worlds/robocup14_spl_field.world"/>`
 * To launch the teleop keyboard in a new terminal, set the `launch-prefix` to `xterm -e`
 
+
+## [Exercise 2](<docs/exercise/Exercise Session 2.pdf>)
+This exercise is based on [lecture 2](<docs/lecture/ROS Course Slides Course 2.pdf>).
+
+Run the launch file with the following command:
+
+`roslaunch smb_highlevel_controller smb_highlevel_controller.launch`
+
+The solution package template is based on [ros_best_practices](https://github.com/leggedrobotics/ros_best_practices)
+
+### Output
+The solution output should be as follow:
+|![solution_2.png](docs/image/solution_2.png)|
+|:--:|
+| <b>Rviz with laserscan, terminal with output and gazebo</b>|
+
+##### pointcloud_to_laserscan
+![pointcloud_to_laserscan.png](docs/image/pointcloud_to_laserscan.png)|
+
+As can be seen from the `rqt_graph`, the `pointcloud_to_laserscan` node is subscribing to `/rslidar_points` which is a `PointCloud2` message and `/tf` and converts it into a `LaserScan` topic `/scan`.
+
+### Files
+#### [default_parameters.yaml](smb_highlevel_controller/config/default_parameters.yaml): 
+* consist of parameters that are passed to the launch file.
+
+#### [SmbHighlevelController.hpp](smb_highlevel_controller/include/smb_highlevel_controller/SmbHighlevelController.hpp): 
+* Header file for **SmbHighlevelController** class and method declaration.
+* Include `roscpp` and `sensor_msgs` that are used in the executable file.
+
+#### [smb_highlevel_controller_node.cpp](smb_highlevel_controller/src/smb_highlevel_controller_node.cpp):
+* Create a ROS node with private node handler `(~)`.
+#### [SmbHighlevelController.cpp](smb_highlevel_controller/src/SmbHighlevelController.cpp): 
+* Implementation of the class method including fetch parameters from launch
+* Subscribe to topics name based on the parameters
+* Implementation of callback method such as `scanCallback` and `pclCallback`.
+
+#### [smb_highlevel_controller.rviz](smb_highlevel_controller/rviz/smb_highlevel_controller.rviz): 
+* contains rviz file format which were created by running rviz seperately, adding the required display, and saving it into the rviz file.
+
+#### [smb_highlevel_controller.launch](smb_highlevel_controller/launch/smb_highlevel_controller.launch):
+
+* Add `<rosparam>` to load [default_parameters.yaml](smb_highlevel_controller/config/default_parameters.yaml) to parameter server.
+* Add `node` to launch the [smb_highlevel_controller_node](smb_highlevel_controller/src/smb_highlevel_controller_node.cpp) script.
+
+#### [CMakeLists.txt](smb_highlevel_controller/CMakeLists.txt):
+* Use `C++11` with `add_compile_options`
+* Add `find_package` to find libraries such as `roscpp` and `sensor_msgs`.
+* Add `catkin_package` to include `INCLUDE_DIRS`.
+* Define the include directories using `include_directories`.
+* Add executable based on the project name from two different files which are [smb_highlevel_controller_node.cpp](smb_highlevel_controller/src/smb_highlevel_controller_node.cpp) and [SmbHighlevelController.cpp](smb_highlevel_controller/src/SmbHighlevelController.cpp)
+* Link the libraries based on the `catkin_LIBRARIES` which is defined on the top.
+
+#### [package.xml](smb_highlevel_controller/package.xml)
+* Add `depend` for the dependencies which are `roscpp`, `sensor_msgs` and `smb_gazebo`
