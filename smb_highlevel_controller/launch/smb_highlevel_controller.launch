@@ -1,18 +1,20 @@
 <?xml version="1.0"?>
 <launch>
-  <!-- Launching the SMB simulation with Robocup World -->
+  <!-- Launching the SMB simulation with single pillar world -->
   <include file="$(find smb_gazebo)/launch/smb_gazebo.launch">
-    <arg name="world_file" value="worlds/robocup14_spl_field.world"/>
+    <arg name="world_file" value="$(find smb_highlevel_controller)/world/singlePillar.world"/>
     <arg name="laser_enabled" value="true"/>
+    <arg name="laser_scan_min_height" value="-0.2"/>
+    <arg name="laser_scan_max_height" value="1.0"/>
   </include>
-
+  
   <!-- Launching the highlevel controller node -->
   <node name="smb_highlevel_controller" pkg="smb_highlevel_controller" type="smb_highlevel_controller" output="screen">
     <rosparam file="$(find smb_highlevel_controller)/config/default_parameters.yaml" command="load"/>
   </node>
 
   <!-- Launching the teleoperation keyboard node -->
-  <node name="teleop" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" launch-prefix="xterm -e"/>
+  <!-- <node name="teleop" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" launch-prefix="xterm -e"/> -->
 
   <!-- Launching RViz -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find smb_highlevel_controller)/rviz/smb_highlevel_controller.rviz"/>

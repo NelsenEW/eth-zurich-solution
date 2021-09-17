@@ -1,0 +1,2 @@
+library 'continuous_integration_pipeline'
+ciPipeline("--generate-clone-deps smb_lpc smb_sim smb_opc --ignore smb_gazebo --dependencies='git@bitbucket.org:leggedrobotics/ocs2_dev.git;8.0;git' --no-tests --generate-clone-deps-only-on-branches master")

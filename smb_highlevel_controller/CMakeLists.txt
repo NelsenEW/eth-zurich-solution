@@ -5,8 +5,13 @@ project(smb_highlevel_controller)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
+  geometry_msgs
+  visualization_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+  tf2_msgs
 )
-
 ###################################
 ## catkin specific configuration ##
 ###################################
