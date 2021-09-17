@@ -7,6 +7,7 @@ add_compile_options(-std=c++11)
 # Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  std_srvs
   sensor_msgs
   geometry_msgs
   visualization_msgs
@@ -41,8 +42,16 @@ add_executable(${PROJECT_NAME}
   src/SmbHighlevelController.cpp
 )
 
+add_executable( stop_condition
+  src/stop_condition_node.cpp
+)
+
 # Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries( stop_condition
   ${catkin_LIBRARIES}
 )
 

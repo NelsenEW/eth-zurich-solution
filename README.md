@@ -228,3 +228,86 @@ The `smb_top_view` frame will move according to the `base_link` frame. As such, 
 * Add `rosbag` node to play rosbag with full speed or half speed.
 * Launch rviz with [ekf_localization.rviz](smb_highlevel_controller/rviz/ekf_localization.rviz) configuration.
 * Add rqt_multiplot node with [xy_multiplot.xml](smb_highlevel_controller/config/xy_multiplot.xml) to plot the path of smb in x/y plane.
+
+## [Exercise 5](<docs/exercise/Exercise Session 5.pdf>)
+
+This exercise is based on [lecture 4](<docs/lecture/ROS Course Slides Course 4.pdf>).
+
+### Manual Service call
+The service name `/startService` is defined inside [default_parameters.yaml](smb_highlevel_controller/config/default_parameters.yaml).
+
+Run the launch file with the following command:
+
+`roslaunch smb_highlevel_controller smb_highlevel_controller.launch`
+
+To start the robot, run the following command on another terminal:
+
+`rosservice call /startService "data: true"`
+
+Alternatively you can run the robot during the startup with the following command:
+
+`roslaunch smb_highlevel_controller smb_highlevel_controller.launch start_robot:="true"`
+
+To stop the robot **manually** from colliding, open another terminal and run the following command:
+
+`rosservice call /startService "data: false"`
+
+The robot can always continue its path by calling the service by setting the data to `true`.
+
+### Automatic emergency
+#### Prior collision
+Run the launch file with the following command:
+
+`roslaunch smb_highlevel_controller smb_highlevel_controller.launch start_robot:="true" auto_emergency:="true"`
+
+By default, the robot will stop **before** hitting the pillar with a distance of `max_distance_to_pillar` from the robot's lidar that is specified in the [default_parameters.yaml](smb_highlevel_controller/config/default_parameters.yaml).
+
+
+The solution output should be as follow:
+|![solution_5_prior_collision.png.png](docs/image/solution_5_prior_collision.png)|
+|:--:|
+| <b>The SMB stops before hitting the pillar. In the terminal, the service was called to stop the robot. </b>|
+
+#### Post collision
+Run the launch file with the following command:
+
+`roslaunch smb_highlevel_controller smb_highlevel_controller.launch start_robot:="true" auto_emergency:="true" prior_collision:="false"`
+
+
+By default, the robot will stop **after** hitting the pillar based on `collision_threshold` which is the maximum change of IMU on x axis before the service is called that is specified in the [default_parameters.yaml](smb_highlevel_controller/config/default_parameters.yaml).
+
+To get a proper `collision_threshold`, `rqt_multiplot` is launched with the [xy_imu_multiplot.xml](smb_highlevel_controller/config/xy_imu_multiplot.xml) config.
+
+During the collision, the x-axis IMU plot can be seen as follow:
+
+|![solution_5_imu_plot.png](docs/image/solution_5_imu_plot.png)|
+|:--:|
+| <b>The plot of IMU x-axis and y-axis plot during collision, there is a sudden spike of IMU x-axis with the value change of around 1.8 </b>|
+
+The overall output should be as follow:
+|![solution_5_post_collision.png](docs/image/solution_5_post_collision.png)|
+|:--:|
+| <b>The SMB stops after hitting the pillar. In the terminal, the service was called to stop the robot. </b>|
+
+### Files
+#### [SmbHighlevelController.cpp](smb_highlevel_controller/src/SmbHighlevelController.cpp) and [SmbHighlevelController.hpp](smb_highlevel_controller/include/smb_highlevel_controller/SmbHighlevelController.hpp):
+* Add parameters for the service (i.e. service name, start_robot).
+* Add start/stop server, service name and service callback based on the service call with `SetBool`.
+* Add bool `isStart_` to move the robot only if it is enabled.
+#### [stop_condition_node.cpp](smb_highlevel_controller/src/stop_condition_node.cpp)
+* As the client, call the service to stop SMB robot with `SetBool` based on the parameter `prior_collision`. 
+* The parameters that can be adjusted are `max_distance_to_pillar` for prior collision and `collision_threshold` for post collision.
+* This node is called from the launch file if the parameter `auto_emergency` is enabled.
+
+#### [xy_imu_multiplot.xml](smb_highlevel_controller/config/xy_multiplot.xml):
+* Create an x/y-plane plot of the smb and the x and y IMU data over time.
+#### [smb_highlevel_controller.launch](smb_highlevel_controller/launch/smb_highlevel_controller.launch):
+* Use arguments to load some of the params instead of `rosparam` from [default_parameters.yaml](smb_highlevel_controller/config/default_parameters.yaml). This allow arguments to be passed from command line.
+* Add `stop_condition_node` to automatically stop the SMB prior/post collision if enabled.
+* Change rqt_multiplot config with [xy_imu_multiplot.xml](smb_highlevel_controller/config/xy_imu_multiplot.xml) to plot the path of smb in x/y plane as well as x and y IMU data over time.
+#### [CMakeLists.txt](smb_highlevel_controller/CMakeLists.txt)
+* Add std_srvs in `find_package`
+* Add executable `stop_condition` from `stop_condition_node.cpp`
+* Add `target_link_libraries` for `stop_condition`
+#### [package.xml](smb_highlevel_controller/package.xml)
+* Add depend `std_srvs` to use `SetBool` service.

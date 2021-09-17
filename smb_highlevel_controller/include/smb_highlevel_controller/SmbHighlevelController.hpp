@@ -9,6 +9,7 @@
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <std_srvs/SetBool.h>
 #include <string.h>
 
 namespace smb_highlevel_controller {
@@ -59,6 +60,12 @@ class SmbHighlevelController {
 
   /*publish the visualization marker on the pillar*/
   void visMarkerPublish(const geometry_msgs::PoseStamped &goalPose);
+
+  /*start/stop server*/
+  std::string serviceName_;
+  ros::ServiceServer startServer_;
+  bool isStart_;
+  bool startCallback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& resp);
 
 };
 

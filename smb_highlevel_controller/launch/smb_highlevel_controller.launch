@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="start_robot" default="false"/>
+  <arg name="auto_emergency" default="false"/>
+  <arg name="prior_collision" default="true"/>
   <!-- Launching the SMB simulation with single pillar world -->
   <include file="$(find smb_gazebo)/launch/smb_gazebo.launch">
     <arg name="world_file" value="$(find smb_highlevel_controller)/world/singlePillar.world"/>
@@ -10,6 +13,13 @@
   
   <!-- Launching the highlevel controller node -->
   <node name="smb_highlevel_controller" pkg="smb_highlevel_controller" type="smb_highlevel_controller" output="screen">
+    <param name="start_robot" type="boolean" value="$(arg start_robot)"/>
+    <rosparam file="$(find smb_highlevel_controller)/config/default_parameters.yaml" command="load"/>
+  </node>
+
+  <!-- Launching automatic emergency node -->
+  <node if="$(arg auto_emergency)" name="stop_condition_service_node" pkg="smb_highlevel_controller" type="stop_condition" output="screen">
+    <param name="prior_collision" type="boolean" value="$(arg prior_collision)"/>
     <rosparam file="$(find smb_highlevel_controller)/config/default_parameters.yaml" command="load"/>
   </node>
 
@@ -20,6 +30,6 @@
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find smb_highlevel_controller)/rviz/smb_highlevel_controller.rviz"/>
 
   <!-- Launching rqt multiplot -->
-  <node name="rqt_multiplot" pkg="rqt_multiplot" type="rqt_multiplot" args="--multiplot-config $(find smb_highlevel_controller)/config/xy_multiplot.xml --multiplot-run-all"/>
+  <node unless="$(arg prior_collision)" name="rqt_multiplot" pkg="rqt_multiplot" type="rqt_multiplot" args="--multiplot-config $(find smb_highlevel_controller)/config/xy_imu_multiplot.xml --multiplot-run-all"/>
 
 </launch>

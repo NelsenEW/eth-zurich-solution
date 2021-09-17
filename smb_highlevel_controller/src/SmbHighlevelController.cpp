@@ -17,6 +17,7 @@ SmbHighlevelController::SmbHighlevelController(ros::NodeHandle &nodeHandle) :
 
 	cmdPublisher_ = nodeHandle_.advertise<geometry_msgs::Twist>("/cmd_vel", 0);
     markerPublisher_ = nodeHandle_.advertise<visualization_msgs::Marker>("/visualization_marker", 0);
+    startServer_ = nodeHandle_.advertiseService(serviceName_, &SmbHighlevelController::startCallback, this);
 }
 
 SmbHighlevelController::~SmbHighlevelController() {
@@ -24,6 +25,7 @@ SmbHighlevelController::~SmbHighlevelController() {
 
 bool SmbHighlevelController::readParameters() {
 	bool success = true;
+    // Access parameter with global name
 	success &= nodeHandle_.getParam(
 			"/smb_highlevel_controller/scan_subscriber_topic_name", scanTopic_);
 	success &= nodeHandle_.getParam(
@@ -33,6 +35,10 @@ bool SmbHighlevelController::readParameters() {
 			"/smb_highlevel_controller/x_vel", xVel_);
 	success &= nodeHandle_.getParam(
 			"/smb_highlevel_controller/p_gain_ang", kpAng_);
+    success &= nodeHandle_.getParam(
+            "/smb_highlevel_controller/service_name", serviceName_);
+    success &= nodeHandle_.getParam(
+            "/smb_highlevel_controller/start_robot", isStart_);
 	return success;
 }
 
@@ -80,8 +86,10 @@ void SmbHighlevelController::transformOdom(geometry_msgs::PoseStamped & pose, ge
 }
 void SmbHighlevelController::moveToGoal(const geometry_msgs::PoseStamped &goalPose){
     geometry_msgs::Twist velMsg;
-	velMsg.linear.x = xVel_;
-	velMsg.angular.z = kpAng_ * atan2(goalPose.pose.position.y, goalPose.pose.position.x);
+    if (isStart_){
+        velMsg.linear.x = xVel_;
+        velMsg.angular.z = kpAng_ * atan2(goalPose.pose.position.y, goalPose.pose.position.x);
+    }
     cmdPublisher_.publish(velMsg);
     ROS_DEBUG_STREAM_THROTTLE(2.0, "velMsg.linear.x : " << velMsg.linear.x);
 	ROS_DEBUG_STREAM_THROTTLE(2.0, "velMsg.angular.z : " << velMsg.angular.z);
@@ -104,6 +112,16 @@ void SmbHighlevelController::visMarkerPublish(const geometry_msgs::PoseStamped &
     marker.color.g = 1.0;
     marker.color.b = 0.0;
     markerPublisher_.publish( marker );
+}
+
+bool SmbHighlevelController::startCallback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& resp){
+    resp.success = true;
+    if (isStart_ != req.data){
+        isStart_ = req.data;
+        resp.message = std::string("Set SMB to ") + ((req.data) ? "start" : "stop");
+        ROS_WARN("SMB %s service called: %s", serviceName_.c_str(),resp.message.c_str()); // Another way to log using C style char
+    }
+    return resp.success;
 }
 
 }  // namespace smb_highlevel_controller
