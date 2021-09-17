@@ -70,8 +70,13 @@
         "typeinfo": "cpp",
         "bit": "cpp"
     },
-    "ros.distro": "${ROS_DISTRO}",
+    "ros.distro": "noetic",
+    "python.analysis.extraPaths": [
+        "/opt/ros/noetic/lib/python3/dist-packages",
+        "./smb_highlevel_controller/src"
+    ],
     "python.autoComplete.extraPaths": [
-        "/opt/ros/"
+        "/opt/ros/noetic/lib/python3/dist-packages",
+        "./smb_highlevel_controller/src"
     ]
 }
