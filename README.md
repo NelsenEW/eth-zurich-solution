@@ -143,3 +143,80 @@ The solution output should be as follow:
 
 #### [smb_highlevel_controller.rviz](smb_highlevel_controller/rviz/smb_highlevel_controller.rviz):
 * Add `Marker` display to visualize the pillar marker indicated with green color ball.
+
+## [Exercise 4](<docs/exercise/Exercise Session 4.pdf>)
+
+This exercise is based on [lecture 3](<docs/lecture/ROS Course Slides Course 3.pdf>) and [lecture 4](<docs/lecture/ROS Course Slides Course 4.pdf>).
+
+This exercise requires the use of rqt_multiplot. Run the following command to install rqt_multiplot:
+`sudo apt install -y ros-<distro>-rqt-multiplot`
+
+where `<distro>` can be either melodic or noetic based on your computer ROS_DISTRO.
+### Simulation
+The simulation can be run with the following command:
+`roslaunch smb_highlevel_controller smb_highlevel_controller.launch`
+#### EKF Localization Node
+To understand the EKF Localization Node, open another terminal, then open it with `rqt_graph`.
+
+The output is the following:
+|![solution_4_ekf_localization.png](docs/image/solution_4_ekf_localization.png)|
+|:--:|
+| <b>ekf_localization node in rqt_graph</b>|
+
+As can be seen from the graph, the ekf localization subscribes to `/imu/data` and `/smb_velocity_controller/odom` topics and publishes `/odometry/filtered` topic by applying extended kalman filter. In this case, the topic will be displayed in both rqt_multiplot and rviz.
+
+#### Plot of simulation x/y-plane
+The solution output should be as follow:
+|![solution_4_simulation.png](docs/image/solution_4_simulation.png)|
+|:--:|
+| <b>Plot of x/y-plane that is taken by SMB (Kp = 30, x_vel = 3 m/s) until it hits the pillar on rqt_multiplot</b>|
+
+### Recorded (rosbag)
+#### ROS Topic inside `smb_navigation.bag`
+To get all the topics and messages inside the rosbag, run the following command:
+
+`rosbag info smb_navigation.bag`
+
+The solution should be as follow:
+![solution_4_rosbag_info.png](docs/image/solution_4_rosbag_info.png)
+
+To run the recorded rosbag, use the following command:
+
+`roslaunch smb_highlevel_controller ekf_localization.launch`
+
+#### Plot of recorded x/y-plane
+The solution output should be as follow:
+|![solution_4_recorded.png](docs/image/solution_4_recorded.png)|
+|:--:|
+| <b>Plot of x/y-plane plot that is taken by SMB until the rosbag recording ends</b>|
+
+
+#### Visualization of 3D point cloud and TF marker in Rviz
+The 3D point cloud as well as `smb_top_view` frame can be visualize in rviz:
+|![solution_4_rviz.png](docs/image/solution_4_rviz.png)|
+|:--:|
+| <b>3D lidar point cloud and smb_top_view frame visualize in rviz</b>|
+
+The `smb_top_view` frame will move according to the `base_link` frame. As such, the `smb_top_view` is moving together with the robot in rviz when the rosbag is played.
+
+### Files
+
+#### [smb_navigation.bag](smb_highlevel_controller/bag/smb_navigation.bag):
+* Contains 59.7 seconds of a recorded simulation.
+* The size of the bag is 158.9 MB with total messages of 1545.
+* The topics recorded are `/imu/data`, `join_states`, `rslidar_points`, and `smb_velocity_controller/odom`
+#### [xy_multiplot.xml](smb_highlevel_controller/config/xy_multiplot.xml):
+* Create an x/y-plane plot of the smb based on the output of the `ekf_localization` node which is `/odometry/filtered` with type `nav_msgs/Odometry`.
+#### [ekf_localization.rviz](smb_highlevel_controller/rviz/ekf_localization.rviz):
+* Display TF, PointCloud2, and RobotModel of the smb
+#### [smb_highlevel_controller.launch](smb_highlevel_controller/launch/smb_highlevel_controller.launch):
+* Add rqt_multiplot node with [xy_multiplot.xml](smb_highlevel_controller/config/xy_multiplot.xml) to plot the path of smb in x/y plane.
+
+#### [ekf_localization.launch](smb_highlevel_controller/launch/ekf_localization.launch):
+* Refer from [control.launch](smb_common_v2/smb_control/launch/control.launch) file that is located on the `smb_control` package.
+* Add `ekf_robot_localization` node and load the required parameters from the [localization.yaml](smb_common_v2/smb_control/config/localization.yaml)
+* Add `smb_robot_state_publisher` to publish state of the robot to tf2 that is visualize in rviz.
+* Create a frame called `smb_top_view` with `static_transform_publisher` node which is 2 meters above the `base_link` frame.
+* Add `rosbag` node to play rosbag with full speed or half speed.
+* Launch rviz with [ekf_localization.rviz](smb_highlevel_controller/rviz/ekf_localization.rviz) configuration.
+* Add rqt_multiplot node with [xy_multiplot.xml](smb_highlevel_controller/config/xy_multiplot.xml) to plot the path of smb in x/y plane.
